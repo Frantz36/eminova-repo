@@ -1,0 +1,153 @@
+{
+ "results": [
+  [
+   "Workbench renders with no JS errors",
+   true,
+   ""
+  ],
+  [
+   "first load asked the API (204 \u2192 seed)",
+   true,
+   ""
+  ],
+  [
+   "seed state saved to API on first boot (PUT)",
+   true,
+   ""
+  ],
+  [
+   "initial state persisted server-side",
+   true,
+   "31,086 bytes"
+  ],
+  [
+   "14 workspaces defined",
+   true,
+   14
+  ],
+  [
+   "all 14 workspaces render a heading",
+   true,
+   "Payroll & HR control r | People & lifecycle | Leave & time | October 2026 \u00b7 Monthly | Corrections & off-cycl | Payments & finance | Compliance & filing | Statutory rules | Privacy & security | Self-service & cases | Analytics & what-if | Ar"
+  ],
+  [
+   "no JS errors while navigating",
+   true,
+   ""
+  ],
+  [
+   "role change saved (PUT /api/state)",
+   true,
+   ""
+  ],
+  [
+   "after reload (localStorage wiped) state restored from API",
+   true,
+   [
+    "prep",
+    "Input Frozen",
+    "Validation test",
+    2
+   ]
+  ],
+  [
+   "hash-chained audit log survives round-trip",
+   true,
+   ""
+  ],
+  [
+   "import employees: rows merged, no unmapped headings",
+   true,
+   {
+    "entity": "employees",
+    "stateKey": "emps",
+    "added": 3,
+    "updated": 0,
+    "warnings": []
+   }
+  ],
+  [
+   "import leave: rows merged, no unmapped headings",
+   true,
+   {
+    "entity": "leave",
+    "stateKey": "leave",
+    "added": 2,
+    "updated": 0,
+    "warnings": []
+   }
+  ],
+  [
+   "import cases: rows merged, no unmapped headings",
+   true,
+   {
+    "entity": "cases",
+    "stateKey": "cases",
+    "added": 1,
+    "updated": 0,
+    "warnings": []
+   }
+  ],
+  [
+   "migrated employee typed correctly (R 26 800,00 \u2192 26800, Yes \u2192 true, dd/MM/yyyy \u2192 ISO)",
+   true,
+   [
+    "Nokuthula Zulu",
+    26800,
+    true,
+    "1993-03-14",
+    "0234567893",
+    "number"
+   ]
+  ],
+  [
+   "payroll engine calculates migrated employee (gross / PAYE / UIF / net)",
+   true,
+   [
+    26800,
+    2700.48,
+    177.12,
+    20262.4
+   ]
+  ],
+  [
+   "hourly worker (41.20 \u00d7 190 h + OT) calculates",
+   true,
+   [
+    8446,
+    8277.51
+   ]
+  ],
+  [
+   "migrated employees listed in People & Lifecycle",
+   true,
+   ""
+  ],
+  [
+   "migrated leave visible in Leave & Time",
+   true,
+   ""
+  ],
+  [
+   "no JS errors after migration",
+   true,
+   ""
+  ],
+  [
+   "concurrent edit by a second user is refused (409) \u2014 no silent overwrite",
+   true,
+   "Another user saved payroll changes a moment ago \u2014 loading the latest version. Please repeat your last action."
+  ],
+  [
+   "second user is reloaded onto the latest state",
+   true,
+   ""
+  ]
+ ],
+ "metrics": {
+  "html_bytes": 786370,
+  "state_bytes_after_migration": 36161,
+  "first_load_seconds": 1.07,
+  "puts": 4
+ }
+}

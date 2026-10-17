@@ -1,0 +1,63 @@
+# deploy/ops/prometheus-alerts.yml — EMINOVA health & capacity alert rules (ITIL monitoring & event management).
+# 'priority' label maps to the ITIL priority matrix on the BC-DR tab; Alertmanager forwards to the ITSM webhook and the AI agent.
+groups:
+  - name: eminova-availability
+    rules:
+      - alert: EminovaHealthDown
+        expr: probe_success{job="eminova-healthz"} == 0
+        for: 2m
+        labels: { priority: P1, service: eminova, runbook: RB-2 }
+        annotations: { summary: "/healthz failing on {{ $labels.instance }} for 2 minutes" }
+      - alert: EminovaDatabaseDown
+        expr: pg_up == 0
+        for: 1m
+        labels: { priority: P1, service: eminova, runbook: RB-3 }
+        annotations: { summary: "PostgreSQL unreachable on {{ $labels.instance }}" }
+      - alert: EminovaErrorBudgetBurn
+        expr: (sum(rate(http_requests_total{job="eminova",code=~"5.."}[1h])) / sum(rate(http_requests_total{job="eminova"}[1h]))) > 0.0144
+        for: 5m
+        labels: { priority: P2, service: eminova, runbook: RB-2 }
+        annotations: { summary: "5xx rate burning the 99.9% monthly error budget 14x faster than allowed" }
+  - name: eminova-performance
+    rules:
+      - alert: EminovaSlowSaves
+        expr: histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{job="eminova",route="/api/state",method="PUT"}[10m]))) > 4
+        for: 10m
+        labels: { priority: P2, service: eminova, runbook: RB-4 }
+        annotations: { summary: "p95 state save above the 4 s design target" }
+      - alert: EminovaStateDocumentLarge
+        expr: eminova_state_bytes > 8e6
+        labels: { priority: P3, service: eminova, runbook: RB-4 }
+        annotations: { summary: "Tenant state above 8 MB — plan per-entity API split (capacity)" }
+  - name: eminova-capacity
+    rules:
+      - alert: EminovaCpuHigh
+        expr: 100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 15m
+        labels: { priority: P3, service: eminova, runbook: RB-4 }
+      - alert: EminovaMemoryHigh
+        expr: (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100 > 85
+        for: 10m
+        labels: { priority: P3, service: eminova, runbook: RB-2 }
+      - alert: EminovaDiskFillingIn7Days
+        expr: predict_linear(node_filesystem_avail_bytes{mountpoint=~"/|/var/lib/postgresql"}[6h], 7*24*3600) < 0
+        for: 30m
+        labels: { priority: P3, service: eminova, runbook: RB-3 }
+        annotations: { summary: "Disk predicted full within 7 days on {{ $labels.instance }}" }
+      - alert: EminovaDbConnectionsHigh
+        expr: sum(pg_stat_activity_count) / max(pg_settings_max_connections) > 0.8
+        for: 10m
+        labels: { priority: P2, service: eminova, runbook: RB-3 }
+  - name: eminova-protection
+    rules:
+      - alert: EminovaBackupStale
+        expr: time() - eminova_last_backup_timestamp_seconds > 26*3600
+        labels: { priority: P2, service: eminova, runbook: RB-9 }
+        annotations: { summary: "No successful backup in 26 hours (RPO at risk)" }
+      - alert: EminovaWalArchiveLag
+        expr: time() - pg_stat_archiver_last_archive_age_seconds > 900
+        labels: { priority: P2, service: eminova, runbook: RB-3 }
+        annotations: { summary: "WAL archiving behind 15 min — RPO ≤ 15 min at risk" }
+      - alert: EminovaCertificateExpiring
+        expr: probe_ssl_earliest_cert_expiry{job="eminova-healthz"} - time() < 14*24*3600
+        labels: { priority: P3, service: eminova, runbook: RB-6 }

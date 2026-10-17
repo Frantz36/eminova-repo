@@ -1,0 +1,19 @@
+# /etc/systemd/system/eminova-host.service  — Linux (Ubuntu 22.04/24.04, RHEL 9) without Docker
+[Unit]
+Description=Eminova.Host (ASP.NET Core 8)
+After=network.target postgresql.service
+
+[Service]
+WorkingDirectory=/opt/eminova
+ExecStart=/usr/bin/dotnet /opt/eminova/Eminova.Host.dll
+Restart=always
+RestartSec=5
+User=eminova
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=ASPNETCORE_URLS=http://127.0.0.1:5000
+Environment=Hosting__HttpsRedirect=false
+EnvironmentFile=/etc/eminova/host.env          # DB password, OIDC secret (chmod 600, owned by root:eminova)
+SyslogIdentifier=eminova-host
+
+[Install]
+WantedBy=multi-user.target

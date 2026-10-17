@@ -1,0 +1,35 @@
+# Staging / single-server production: reverse proxy + host + PostgreSQL. `docker compose up -d`
+services:
+  proxy:
+    image: nginx:1.27-alpine
+    ports: ["8000:8000", "80:80"]
+    volumes:
+      - ./nginx.dev.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on: [host]
+    restart: unless-stopped
+
+  host:
+    build: { context: ../.., dockerfile: deploy/docker/Dockerfile, args: { TENANT: "${TENANT:-default}" } }
+    image: eminova-host:1.0.0
+    environment:
+      Database__Provider: PostgreSQL
+      ConnectionStrings__Eminova: "Host=db;Port=5432;Database=eminova;Username=eminova_app;Password=${DB_PASSWORD}"
+      Auth__Authority: "${AUTH_AUTHORITY:-}"           # empty = POC anonymous mode
+      Auth__ClientId: "${AUTH_CLIENT_ID:-eminova-dashboard}"
+      Auth__ClientSecret: "${AUTH_CLIENT_SECRET:-}"
+      Hosting__DefaultTenant: "${TENANT:-default}"
+    depends_on: { db: { condition: service_healthy } }
+    restart: unless-stopped
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: eminova
+      POSTGRES_USER: eminova_app
+      POSTGRES_PASSWORD: "${DB_PASSWORD}"
+    volumes: [ "pgdata:/var/lib/postgresql/data" ]
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U eminova_app -d eminova"], interval: 10s, timeout: 5s, retries: 10 }
+    restart: unless-stopped
+
+volumes:
+  pgdata:

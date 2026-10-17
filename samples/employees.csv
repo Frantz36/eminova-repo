@@ -1,0 +1,4 @@
+Employee No,Full Name,Job Title,Department,Pay Frequency,Pay Basis,Basic Salary,Hourly Rate,Ordinary Hours,Date of Birth,Tax Number,Bank Name,Account Number,Pension Fund,Medical Aid,Medical Dependants,Start Date,Employment Status,Occupational Level,Gender,Overtime Hours
+E101,Nokuthula Zulu,Payroll Administrator,Finance,Monthly,salary,"R 26 800,00",,,14/03/1993,0234567893,FNB ···7781,62007781,Yes,1650,1,01/02/2024,Active,Skilled technical,F,
+E102,Thabo Mahlangu,Driver,Operations,Weekly,hourly,,41.20,190,1990-07-21,1345678902,Capitec ···3310,15563310,No,,,2023-08-14,Active,Semi-skilled,M,10
+E103,Annelize Botha,HR Business Partner,Human Resources,Monthly,salary,48500,,,1984-11-02,2456789011,Absa ···9024,40769024,Yes,3900,2,2019-05-01,Active,Professionally qualified,F,

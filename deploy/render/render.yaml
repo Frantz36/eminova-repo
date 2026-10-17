@@ -1,0 +1,35 @@
+# Render Blueprint — EMINOVA UAT (copy to repository root as render.yaml). Region: Frankfurt (no African region on Render).
+# UAT holds SYNTHETIC / anonymised data only (POPIA). Delete the services after UAT sign-off.
+services:
+  - type: web
+    name: eminova-uat
+    runtime: docker
+    region: frankfurt
+    plan: standard                 # 1 CPU / 2 GB (plan id 1c-2g)
+    dockerfilePath: ./deploy/docker/Dockerfile
+    dockerContext: .
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: Database__Provider
+        value: PostgreSQL
+      - key: ConnectionStrings__Eminova
+        fromDatabase:
+          name: eminova-uat-db
+          property: connectionString
+      - key: Hosting__HttpsRedirect
+        value: "false"             # Render terminates TLS
+      - key: Hosting__DefaultTenant
+        value: uat
+      - key: Hosting__StateScope
+        value: tenant
+      - key: Auth__Authority
+        sync: false                # set in the dashboard (blank = UAT anonymous mode)
+      - key: Auth__ClientSecret
+        sync: false
+databases:
+  - name: eminova-uat-db
+    region: frankfurt
+    plan: basic-1gb               # <1 CPU / 1 GB RAM; storage expandable
+    databaseName: eminova
+    user: eminova_app
