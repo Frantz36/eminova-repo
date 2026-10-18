@@ -10,7 +10,7 @@ services:
 
   host:
     build: { context: ../.., dockerfile: deploy/docker/Dockerfile, args: { TENANT: "${TENANT:-default}" } }
-    image: eminova-host:1.0.0
+    image: frantzdimitrikubecloud/eminova-host:1.0.0
     environment:
       Database__Provider: PostgreSQL
       ConnectionStrings__Eminova: "Host=db;Port=5432;Database=eminova;Username=eminova_app;Password=${DB_PASSWORD}"
